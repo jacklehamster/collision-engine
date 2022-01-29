@@ -1,0 +1,78 @@
+<script src="../public/collision-engine.js"></script>
+
+<script id="code-javascript">
+	const collisionMixer = new CollisionMixer({horizontal: true, vertical: true,
+		calculateCollisionBox: (div, collisionBox) => {
+			collisionBox.left = div.offsetLeft;
+			collisionBox.top = div.offsetTop;
+			collisionBox.right = div.offsetLeft + div.offsetWidth;
+			collisionBox.bottom = div.offsetTop + div.offsetHeight;
+		},
+		onEnter: (div, div2) => {
+			div.style.backgroundColor = "#FF000088";
+			setTimeout(() => div.style.backgroundColor = "", 200);
+		},
+		onLeave: (div, div2) => {
+			div.style.backgroundColor = "#00FF0088";
+			setTimeout(() => div.style.backgroundColor = "", 200);
+		}
+	});
+	document.addEventListener("DOMContentLoaded", e => {
+		collisionMixer.addCollision(document.getElementById("box1"));
+		collisionMixer.addCollision(document.getElementById("box2"));
+		collisionMixer.addCollision(document.getElementById("box3"));
+
+		const loop = time => {
+			collisionMixer.refresh(time);
+			requestAnimationFrame(loop);
+		};
+		loop(0);
+	});
+</script>
+<hr>
+CollisionMixer calculates collisions.
+<hr>
+Code:
+<pre id="code" style="border: 1px solid black; padding: 5px; background-color: #FFFFcc"></pre>
+<script>
+	document.getElementById("code").textContent = document.getElementById("code-javascript").textContent;
+</script>
+
+<script>
+	const point = {x:0, y:0};
+	function onMouse(e) {
+		if (e.type === "mousedown") {
+			point.x = e.pageX;
+			point.y = e.pageY;
+		} else if (e.type === "mousemove" && e.buttons) {
+			const div = e.currentTarget;
+			const dx = e.pageX - point.x;
+			const dy = e.pageY - point.y;
+			const left = div.offsetLeft;
+			const top = div.offsetTop;
+			div.style.left = `${left + dx}px`;
+			div.style.top = `${top + dy}px`;
+
+			point.x = e.pageX;
+			point.y = e.pageY;
+		}
+	}
+
+	document.addEventListener("DOMContentLoaded", () => {
+		document.getElementById("box1").addEventListener("mousedown", onMouse);
+		document.getElementById("box2").addEventListener("mousedown", onMouse);
+		document.getElementById("box3").addEventListener("mousedown", onMouse);
+		document.getElementById("box1").addEventListener("mousemove", onMouse);
+		document.getElementById("box2").addEventListener("mousemove", onMouse);
+		document.getElementById("box3").addEventListener("mousemove", onMouse);
+	});	
+</script>
+
+<div id="box1" style="position: absolute; left: 50px; top: 550px; width: 50px; height: 50px; outline:  3px solid black">
+</div>
+
+<div id="box2" style="position: absolute; left: 150px; top: 550px;  width: 50px; height: 50px; outline:  3px solid black">
+</div>
+
+<div id="box3" style="position: absolute; left: 50px; top: 650px;  width: 50px; height: 50px; outline:  3px solid black">
+</div>

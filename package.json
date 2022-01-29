@@ -1,0 +1,31 @@
+{
+  "name": "collision-engine",
+  "version": "1.0.0",
+  "description": "Engine for detecting collisions",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha src/index.test.js",
+    "browserify": "browserify src/index.js -o public/collision-engine.js",
+    "start": "npm run browserify && node demo.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacklehamster/collision-engine.git"
+  },
+  "author": "Jack Le Hamster",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jacklehamster/collision-engine/issues"
+  },
+  "homepage": "https://github.com/jacklehamster/collision-engine#readme",
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "chai": "^4.2.0",
+    "mocha": "^9.1.4",
+    "mock-xmlhttprequest": "^7.0.4"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-static": "^1.2.6"
+  }
+}
