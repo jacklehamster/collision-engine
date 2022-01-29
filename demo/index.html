@@ -13,7 +13,7 @@
 			setTimeout(() => div.style.backgroundColor = "", 200);
 		},
 		onLeave: (div, div2) => {
-			div.style.backgroundColor = "#00FF0088";
+			div.style.backgroundColor = "#0099FF88";
 			setTimeout(() => div.style.backgroundColor = "", 200);
 		}
 	});
@@ -30,7 +30,7 @@
 	});
 </script>
 <hr>
-CollisionMixer calculates collisions.
+CollisionMixer calculates collisions. The boxes blinks <span style="color:red">red</span> when colliding, and <span style="color:blue">blue</span> when leaving collision.
 <hr>
 Code:
 <pre id="code" style="border: 1px solid black; padding: 5px; background-color: #FFFFcc"></pre>
@@ -39,22 +39,19 @@ Code:
 </script>
 
 <script>
-	const point = {x:0, y:0};
+	let holding = null;
 	function onMouse(e) {
+		if (!e.buttons) {
+			holding = null;
+			return;
+		}
 		if (e.type === "mousedown") {
-			point.x = e.pageX;
-			point.y = e.pageY;
+			holding = e.currentTarget;
 		} else if (e.type === "mousemove" && e.buttons) {
-			const div = e.currentTarget;
-			const dx = e.pageX - point.x;
-			const dy = e.pageY - point.y;
-			const left = div.offsetLeft;
-			const top = div.offsetTop;
-			div.style.left = `${left + dx}px`;
-			div.style.top = `${top + dy}px`;
-
-			point.x = e.pageX;
-			point.y = e.pageY;
+			if (holding) {
+				holding.style.left = (e.pageX - holding.offsetWidth / 2) + "px";
+				holding.style.top = (e.pageY - holding.offsetHeight / 2) + "px";
+			}
 		}
 	}
 
@@ -62,9 +59,7 @@ Code:
 		document.getElementById("box1").addEventListener("mousedown", onMouse);
 		document.getElementById("box2").addEventListener("mousedown", onMouse);
 		document.getElementById("box3").addEventListener("mousedown", onMouse);
-		document.getElementById("box1").addEventListener("mousemove", onMouse);
-		document.getElementById("box2").addEventListener("mousemove", onMouse);
-		document.getElementById("box3").addEventListener("mousemove", onMouse);
+		document.addEventListener("mousemove", onMouse);
 	});	
 </script>
 
