@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha src/index.test.js",
     "browserify": "browserify src/index.js -o public/collision-engine.js",
-    "start": "npm run browserify && node demo.js"
+    "start": "node demo.js",
+    "build_start": "npm run browserify && node demo.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,8 @@
     "browserify": "^17.0.0",
     "chai": "^4.2.0",
     "mocha": "^9.1.4",
-    "mock-xmlhttprequest": "^7.0.4"
+    "mock-xmlhttprequest": "^7.0.4",
+    "np": "^7.6.0"
   },
   "dependencies": {
     "express": "^4.17.1",
