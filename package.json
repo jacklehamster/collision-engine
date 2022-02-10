@@ -4,6 +4,8 @@
   "description": "Engine for detecting collisions",
   "main": "src/index.js",
   "scripts": {
+    "install-if-needed": "if [ package.json -nt node_modules ]; then npm install && touch node_modules; fi",
+    "prestart": "npm run install-if-needed",
     "test": "mocha src/index.test.js",
     "browserify": "browserify src/index.js -o public/collision-engine.js",
     "start": "node demo.js",
@@ -28,6 +30,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "express-static": "^1.2.6"
+    "express-static": "^1.2.6",
+    "icon-gen": "^3.0.0"
   }
 }
