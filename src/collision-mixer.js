@@ -77,7 +77,9 @@ class CollisionMixer {
 	}
 
 	updateMarkers(time, markers) {
-		markers.length = 0;
+		markers.length = this.collisionDataList.size * 2;
+
+		let index = 0;
 		for (const collisionData of this.collisionDataList.values()) {
 			const body = collisionData.body;
 			const collisionBox = this.getCollisionBox(body, time);
@@ -86,13 +88,13 @@ class CollisionMixer {
 			topLeftClose.x = collisionBox.left;
 			topLeftClose.y = collisionBox.top;
 			topLeftClose.z = collisionBox.close;
-			markers.push(topLeftClose);
+			markers[index++] = topLeftClose;
 
 			const bottomRightFar = collisionData.bottomRightFar;
 			bottomRightFar.x = collisionBox.right;
 			bottomRightFar.y = collisionBox.bottom;
 			bottomRightFar.z = collisionBox.far;
-			markers.push(bottomRightFar);
+			markers[index++] = bottomRightFar;
 		}
 	}
 

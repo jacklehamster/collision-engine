@@ -26,7 +26,7 @@
     "chai": "^4.2.0",
     "mocha": "^9.1.4",
     "mock-xmlhttprequest": "^7.0.4",
-    "np": "^7.6.0"
+    "np": "^5.2.1"
   },
   "dependencies": {
     "express": "^4.17.1",
