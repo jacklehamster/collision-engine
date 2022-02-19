@@ -213,7 +213,9 @@ class CollisionMixer {
 	}
 
 	updateMarkers(time, markers) {
-		markers.length = this.collisionDataList.size * 2;
+		if (markers.length !== this.collisionDataList.size * 2) {
+			markers.length = this.collisionDataList.size * 2;
+		}
 
 		let index = 0;
 		for (const collisionData of this.collisionDataList.values()) {
