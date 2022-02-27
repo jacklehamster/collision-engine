@@ -1,5 +1,5 @@
-const { CollisionMixer } = require("./collision-mixer");
+const { CollisionMixer } = require('./collision-mixer');
 
 module.exports = {
-	CollisionMixer,
+  CollisionMixer,
 };

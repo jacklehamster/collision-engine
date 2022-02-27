@@ -1,0 +1,17 @@
+{
+    "ts-node": {
+        "transpileOnly": true,
+        "files": true
+    },
+    "compilerOptions": {
+        "outDir": "./dist",
+        "module": "commonjs",
+        "allowJs": true,
+        "declaration": true,
+        "strict": true,
+        "target": "es6"
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}
