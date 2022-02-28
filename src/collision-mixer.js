@@ -1,7 +1,7 @@
 const { CollisionData } = require('./collision-data');
 const { CollisionBoxHolder } = require('./collision-box-holder');
 const { Marker } = require('./marker');
-const { Constants } = require("./constants");
+const { Constants } = require('./constants');
 
 /* tslint:disable:no-bitwise */
 class CollisionMixer {
