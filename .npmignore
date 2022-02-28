@@ -2,3 +2,6 @@ demo
 app.icns
 app.ico
 favicon-*
+.travis.yml
+.git
+node_modules
