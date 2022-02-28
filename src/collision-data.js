@@ -1,4 +1,5 @@
 const { Marker } = require('./marker');
+const { Constants } = require("./constants");
 
 class CollisionData {
   constructor(body, { onCollide, onLeave, onEnter }) {
@@ -7,6 +8,7 @@ class CollisionData {
     this.overlapping = new Map();
     this.topLeftClose = new Marker(this, true);
     this.bottomRightFar = new Marker(this, false);
+    this.radius = 0;
     this.callbacks =
       onCollide || onLeave || onEnter
         ? {
@@ -45,6 +47,18 @@ class CollisionData {
     return this.bottomRightFar.z;
   }
 
+  get centerX() {
+  	return (this.left + this.right) / 2;
+  }
+
+  get centerY() {
+  	return (this.top + this.bottom) / 2;
+  }
+
+  get centerZ() {
+  	return (this.close + this.far) / 2;
+  }
+
   collideAxisWith(collisionData, bits) {
     const collisionBits = this.collisions.get(collisionData) ?? 0;
     // tslint:disable-next-line:no-bitwise
@@ -63,10 +77,29 @@ class CollisionData {
     const collisions = this.collisions;
     for (const secondCollisionData of collisions.keys()) {
       if (collisions.get(secondCollisionData) === fullBits) {
-        this.accountForCollisionWith(secondCollisionData, time);
+      	if (this.radius && secondCollisionData.radius) {
+      		this.checkRadiusCollisionWith(secondCollisionData, fullBits, time);
+      	} else {
+	        this.accountForCollisionWith(secondCollisionData, time);
+      	}
       }
     }
     collisions.clear();
+  }
+
+  checkRadiusCollisionWith(secondCollisionData, fullBits, time) {
+  	const dx = (fullBits & Constants.H) ? (this.centerX - secondCollisionData.centerX) : 0;
+  	const dy = (fullBits & Constants.V) ? (this.centerY - secondCollisionData.centerY) : 0;
+  	const dz = (fullBits & Constants.D) ? (this.centerZ - secondCollisionData.centerZ) : 0;
+  	const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+  	const collisionDepth = this.radius + secondCollisionData.radius - distance;
+  	if (collisionDepth >= 0) {
+  		this.applyCollisionWithPush(secondCollisionData, time,
+  			collisionDepth * dx / distance,
+  			collisionDepth * dy / distance,
+  			collisionDepth * dz / distance,
+  			true);
+  	}
   }
 
   leaveCollisions(time) {
@@ -74,7 +107,7 @@ class CollisionData {
     for (const overlapperData of overlapping.keys()) {
       if (overlapping.get(overlapperData) !== time) {
         overlapping.delete(overlapperData);
-        if (this.callbacks?.onLeave) {
+        if (this.callbacks.onLeave) {
           this.callbacks.onLeave(this.body, overlapperData.body);
         }
       }
@@ -92,16 +125,20 @@ class CollisionData {
     const farPush = collisionData.far - this.close;
     const zPush = closePush < farPush ? -closePush : farPush;
 
+    this.applyCollisionWithPush(collisionData, time, xPush, yPush, zPush, false);
+  }
+
+  applyCollisionWithPush(collisionData, time, xPush, yPush, zPush, circular) {
     const callbacks = this.callbacks;
     if (callbacks) {
       if (callbacks.onEnter && !this.overlapping.has(collisionData)) {
         callbacks.onEnter(this.body, collisionData.body);
       }
       if (callbacks.onCollide) {
-        callbacks.onCollide(this.body, collisionData.body, xPush, yPush, zPush);
+        callbacks.onCollide(this.body, collisionData.body, xPush, yPush, zPush, circular);
       }
     }
-    this.overlapping.set(collisionData, time);
+    this.overlapping.set(collisionData, time);  	
   }
 }
 

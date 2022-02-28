@@ -25,6 +25,7 @@ module.exports = {
 
 },{}],2:[function(require,module,exports){
 const { Marker } = require('./marker');
+const { Constants } = require("./constants");
 
 class CollisionData {
   constructor(body, { onCollide, onLeave, onEnter }) {
@@ -33,6 +34,7 @@ class CollisionData {
     this.overlapping = new Map();
     this.topLeftClose = new Marker(this, true);
     this.bottomRightFar = new Marker(this, false);
+    this.radius = 0;
     this.callbacks =
       onCollide || onLeave || onEnter
         ? {
@@ -71,6 +73,18 @@ class CollisionData {
     return this.bottomRightFar.z;
   }
 
+  get centerX() {
+  	return (this.left + this.right) / 2;
+  }
+
+  get centerY() {
+  	return (this.top + this.bottom) / 2;
+  }
+
+  get centerZ() {
+  	return (this.close + this.far) / 2;
+  }
+
   collideAxisWith(collisionData, bits) {
     const collisionBits = this.collisions.get(collisionData) ?? 0;
     // tslint:disable-next-line:no-bitwise
@@ -89,10 +103,29 @@ class CollisionData {
     const collisions = this.collisions;
     for (const secondCollisionData of collisions.keys()) {
       if (collisions.get(secondCollisionData) === fullBits) {
-        this.accountForCollisionWith(secondCollisionData, time);
+      	if (this.radius && secondCollisionData.radius) {
+      		this.checkRadiusCollisionWith(secondCollisionData, fullBits, time);
+      	} else {
+	        this.accountForCollisionWith(secondCollisionData, time);
+      	}
       }
     }
     collisions.clear();
+  }
+
+  checkRadiusCollisionWith(secondCollisionData, fullBits, time) {
+  	const dx = (fullBits & Constants.H) ? (this.centerX - secondCollisionData.centerX) : 0;
+  	const dy = (fullBits & Constants.V) ? (this.centerY - secondCollisionData.centerY) : 0;
+  	const dz = (fullBits & Constants.D) ? (this.centerZ - secondCollisionData.centerZ) : 0;
+  	const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+  	const collisionDepth = this.radius + secondCollisionData.radius - distance;
+  	if (collisionDepth >= 0) {
+  		this.applyCollisionWithPush(secondCollisionData, time,
+  			collisionDepth * dx / distance,
+  			collisionDepth * dy / distance,
+  			collisionDepth * dz / distance,
+  			true);
+  	}
   }
 
   leaveCollisions(time) {
@@ -100,7 +133,7 @@ class CollisionData {
     for (const overlapperData of overlapping.keys()) {
       if (overlapping.get(overlapperData) !== time) {
         overlapping.delete(overlapperData);
-        if (this.callbacks?.onLeave) {
+        if (this.callbacks.onLeave) {
           this.callbacks.onLeave(this.body, overlapperData.body);
         }
       }
@@ -118,16 +151,20 @@ class CollisionData {
     const farPush = collisionData.far - this.close;
     const zPush = closePush < farPush ? -closePush : farPush;
 
+    this.applyCollisionWithPush(collisionData, time, xPush, yPush, zPush, false);
+  }
+
+  applyCollisionWithPush(collisionData, time, xPush, yPush, zPush, circular) {
     const callbacks = this.callbacks;
     if (callbacks) {
       if (callbacks.onEnter && !this.overlapping.has(collisionData)) {
         callbacks.onEnter(this.body, collisionData.body);
       }
       if (callbacks.onCollide) {
-        callbacks.onCollide(this.body, collisionData.body, xPush, yPush, zPush);
+        callbacks.onCollide(this.body, collisionData.body, xPush, yPush, zPush, circular);
       }
     }
-    this.overlapping.set(collisionData, time);
+    this.overlapping.set(collisionData, time);  	
   }
 }
 
@@ -135,23 +172,16 @@ module.exports = {
   CollisionData,
 };
 
-},{"./marker":5}],3:[function(require,module,exports){
+},{"./constants":4,"./marker":6}],3:[function(require,module,exports){
 const { CollisionData } = require('./collision-data');
 const { CollisionBoxHolder } = require('./collision-box-holder');
 const { Marker } = require('./marker');
-
-const HORIZONTAL = 0;
-const VERTICAL = 1;
-const DEEP = 2;
+const { Constants } = require("./constants");
 
 /* tslint:disable:no-bitwise */
 class CollisionMixer {
   constructor({ horizontal, vertical, deep, getCollisionBox, calculateCollisionBox, onCollide, onEnter, onLeave }) {
-    this.H = 1 << HORIZONTAL;
-    this.V = 1 << VERTICAL;
-    this.D = 1 << DEEP;
-
-    this.BOTH = (horizontal ? this.H : 0) | (vertical ? this.V : 0) | (deep ? this.D : 0);
+    this.BOTH = (horizontal ? Constants.H : 0) | (vertical ? Constants.V : 0) | (deep ? Constants.D : 0);
     this.temp = {
       openColliders: new Set(),
       countedColliders: new Set(),
@@ -216,6 +246,7 @@ class CollisionMixer {
     for (const collisionData of this.collisionDataList.values()) {
       const body = collisionData.body;
       const collisionBox = this.getCollisionBox(body, time);
+      collisionData.radius = collisionBox.radius ?? 0;
 
       const topLeftClose = collisionData.topLeftClose;
       topLeftClose.x = collisionBox.left;
@@ -292,14 +323,29 @@ module.exports = {
 
 globalThis.CollisionMixer = CollisionMixer;
 
-},{"./collision-box-holder":1,"./collision-data":2,"./marker":5}],4:[function(require,module,exports){
+},{"./collision-box-holder":1,"./collision-data":2,"./constants":4,"./marker":6}],4:[function(require,module,exports){
+const HORIZONTAL = 0;
+const VERTICAL = 1;
+const DEEP = 2;
+
+class Constants {
+	static H = 1 << HORIZONTAL;
+	static V = 1 << VERTICAL;
+	static D = 1 << DEEP;
+}
+
+module.exports = {
+  Constants,
+};
+
+},{}],5:[function(require,module,exports){
 const { CollisionMixer } = require('./collision-mixer');
 
 module.exports = {
   CollisionMixer,
 };
 
-},{"./collision-mixer":3}],5:[function(require,module,exports){
+},{"./collision-mixer":3}],6:[function(require,module,exports){
 class Marker {
   constructor(collisionData, isTopLeftClose) {
     this.collisionData = collisionData;
@@ -326,4 +372,4 @@ module.exports = {
   Marker,
 };
 
-},{}]},{},[4]);
+},{}]},{},[5]);

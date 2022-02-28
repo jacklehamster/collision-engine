@@ -7,6 +7,8 @@
 			collisionBox.top = div.offsetTop;
 			collisionBox.right = div.offsetLeft + div.offsetWidth;
 			collisionBox.bottom = div.offsetTop + div.offsetHeight;
+			collisionBox.radius = div.id.indexOf("circle") >= 0
+				? (collisionBox.right - collisionBox.left) / 2 : 0;
 		},
 		onEnter: (div, div2) => {
 			div.style.backgroundColor = "#FF000088";
@@ -15,12 +17,32 @@
 		onLeave: (div, div2) => {
 			div.style.backgroundColor = "#0099FF88";
 			setTimeout(() => div.style.backgroundColor = "", 200);
-		}
+		},
+		onCollide: (div, div2, xPush, yPush, zPush, circular) => {
+			if (circular || Math.abs(xPush) < Math.abs(yPush)) {
+				if (holding !== div) {
+					div.style.left = `${div.offsetLeft + xPush}px`;
+				}
+				if (holding !== div2) {
+					div2.style.left = `${div2.offsetLeft - xPush}px`;
+				}
+			}
+			if (circular || Math.abs(xPush) > Math.abs(yPush)) {
+				if (holding !== div) {
+					div.style.top = `${div.offsetTop + yPush}px`;
+				}
+				if (holding !== div2) {
+					div2.style.top = `${div2.offsetTop - yPush}px`;
+				}
+			}
+		},
 	});
 	document.addEventListener("DOMContentLoaded", e => {
 		collisionMixer.addCollision(document.getElementById("box1"));
 		collisionMixer.addCollision(document.getElementById("box2"));
 		collisionMixer.addCollision(document.getElementById("box3"));
+		collisionMixer.addCollision(document.getElementById("circle1"));
+		collisionMixer.addCollision(document.getElementById("circle2"));
 
 		const loop = time => {
 			collisionMixer.refresh(time);
@@ -33,7 +55,7 @@
 CollisionMixer calculates collisions. The boxes blinks <span style="color:red">red</span> when colliding, and <span style="color:blue">blue</span> when leaving collision.
 <hr>
 Code:
-<pre id="code" style="border: 1px solid black; padding: 5px; background-color: #FFFFcc"></pre>
+<pre id="code" style="border: 1px solid black; padding: 5px; background-color: #FFFFcc; height: 420px; overflow: auto;"></pre>
 <script>
 	document.getElementById("code").textContent = document.getElementById("code-javascript").textContent;
 </script>
@@ -59,15 +81,23 @@ Code:
 		document.getElementById("box1").addEventListener("mousedown", onMouse);
 		document.getElementById("box2").addEventListener("mousedown", onMouse);
 		document.getElementById("box3").addEventListener("mousedown", onMouse);
+		document.getElementById("circle1").addEventListener("mousedown", onMouse);
+		document.getElementById("circle2").addEventListener("mousedown", onMouse);
 		document.addEventListener("mousemove", onMouse);
 	});	
 </script>
 
-<div id="box1" style="position: absolute; left: 50px; top: 550px; width: 50px; height: 50px; outline:  3px solid black">
+<div id="box1" style="position: absolute; left: 50px; top: 550px; width: 50px; height: 50px; outline:  1px solid black">
 </div>
 
-<div id="box2" style="position: absolute; left: 150px; top: 550px;  width: 50px; height: 50px; outline:  3px solid black">
+<div id="box2" style="position: absolute; left: 150px; top: 550px;  width: 100px; height: 50px; outline:  1px solid black">
 </div>
 
-<div id="box3" style="position: absolute; left: 50px; top: 650px;  width: 50px; height: 50px; outline:  3px solid black">
+<div id="box3" style="position: absolute; left: 50px; top: 650px;  width: 50px; height: 50px; outline:  1px solid black">
+</div>
+
+<div id="circle1" style="position: absolute; left: 300px; top: 550px;  width: 50px; height: 50px; outline:  1px solid black; border-radius: 50%;">
+</div>
+
+<div id="circle2" style="position: absolute; left: 400px; top: 550px;  width: 50px; height: 50px; outline:  1px solid black; border-radius: 50%">
 </div>

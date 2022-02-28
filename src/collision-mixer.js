@@ -1,19 +1,12 @@
 const { CollisionData } = require('./collision-data');
 const { CollisionBoxHolder } = require('./collision-box-holder');
 const { Marker } = require('./marker');
-
-const HORIZONTAL = 0;
-const VERTICAL = 1;
-const DEEP = 2;
+const { Constants } = require("./constants");
 
 /* tslint:disable:no-bitwise */
 class CollisionMixer {
   constructor({ horizontal, vertical, deep, getCollisionBox, calculateCollisionBox, onCollide, onEnter, onLeave }) {
-    this.H = 1 << HORIZONTAL;
-    this.V = 1 << VERTICAL;
-    this.D = 1 << DEEP;
-
-    this.BOTH = (horizontal ? this.H : 0) | (vertical ? this.V : 0) | (deep ? this.D : 0);
+    this.BOTH = (horizontal ? Constants.H : 0) | (vertical ? Constants.V : 0) | (deep ? Constants.D : 0);
     this.temp = {
       openColliders: new Set(),
       countedColliders: new Set(),
@@ -78,6 +71,7 @@ class CollisionMixer {
     for (const collisionData of this.collisionDataList.values()) {
       const body = collisionData.body;
       const collisionBox = this.getCollisionBox(body, time);
+      collisionData.radius = collisionBox.radius ?? 0;
 
       const topLeftClose = collisionData.topLeftClose;
       topLeftClose.x = collisionBox.left;
