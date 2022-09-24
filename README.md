@@ -94,6 +94,17 @@ collisionMixer.refresh(time);
 
 Note that time is a number change must change every time refresh is called. Typically, the time from requestAnimationFrame parameter is used.
 
+## Notes on performance and algorithm
+
+I tried to make this algorithm perform as fast as I can know how to make it. I'm sure there are even faster algorithms out there, but I think the one I use here is not too bad. (Beats brute force O( $n^2$ ))). I'll just explain it here so you know how it performs:
+
+1. Pick up all box corner coordinates on the x-axis, on the y-axis, and on the z-axis. Each box has two markers on each axis.
+2. Sort all axis ( O( $log(n)$ )
+3. Iterate through an axis. When we hit a box's marker, put it in a hash. When we hit that box's second marker, remove it from the hash.
+4. Each time we add a box into the hash, look through the whole hash. Every elements currently in that hash overlap.
+    - This might seem like a costly operation, but in an environment where at most 2-3 elements can overlap, it's just ends up being O(n).
+5. Perform callbacks on every box overlapping.
+
 ### Demo
 
 [demo](https://jacklehamster.github.io/collision-engine/)
